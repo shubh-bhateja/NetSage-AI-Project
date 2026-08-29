@@ -1,0 +1,44 @@
+case_id,symptom,topology_note,show_outputs,expected_fault,osi_layer,concept,severity
+1,PC has APIPA address (169.254.x.x) (Variant 1),"Standard 3-router, 2-switch branch topology","show ip dhcp binding
+show ip dhcp pool",DHCP pool exhausted or missing,Layer 7,DHCP,Medium
+2,Guest Wi-Fi can reach internal server (Variant 2),"Standard 3-router, 2-switch branch topology",show access-lists,ACL permit ip any any placed before deny,Layer 3/4,Access Control Lists,Critical
+3,PC has APIPA address (169.254.x.x) (Variant 3),"Standard 3-router, 2-switch branch topology","show ip dhcp binding
+show ip dhcp pool",DHCP pool exhausted or missing,Layer 7,DHCP,Medium
+4,"Internal PCs cannot access the internet, routing is fine (Variant 4)","Standard 3-router, 2-switch branch topology",show ip nat translations,Missing ip nat inside/outside on interfaces,Layer 3,NAT,High
+5,"PC cannot ping external network, local pings work (Variant 5)","Standard 3-router, 2-switch branch topology","show ip route
+show ip interface brief",Incorrect default gateway,Layer 3,Default Gateway,High
+6,Guest Wi-Fi can reach internal server (Variant 6),"Standard 3-router, 2-switch branch topology",show access-lists,ACL permit ip any any placed before deny,Layer 3/4,Access Control Lists,Critical
+7,PC can ping 8.8.8.8 but cannot browse www.cisco.com (Variant 7),"Standard 3-router, 2-switch branch topology",nslookup www.cisco.com,Missing or wrong DNS server,Layer 7,DNS,Medium
+8,PC gets IP but cannot reach server in VLAN 30; gateway ping works (Variant 8),"Standard 3-router, 2-switch branch topology","show vlan brief
+show interfaces trunk",Missing VLAN 30 on trunk,Layer 2,Inter-VLAN routing,High
+9,PC has APIPA address (169.254.x.x) (Variant 9),"Standard 3-router, 2-switch branch topology","show ip dhcp binding
+show ip dhcp pool",DHCP pool exhausted or missing,Layer 7,DHCP,Medium
+10,PC can ping 8.8.8.8 but cannot browse www.cisco.com (Variant 10),"Standard 3-router, 2-switch branch topology",nslookup www.cisco.com,Missing or wrong DNS server,Layer 7,DNS,Medium
+11,PC can ping 8.8.8.8 but cannot browse www.cisco.com (Variant 11),"Standard 3-router, 2-switch branch topology",nslookup www.cisco.com,Missing or wrong DNS server,Layer 7,DNS,Medium
+12,Laptop cannot associate with AP (Variant 12),"Standard 3-router, 2-switch branch topology",show wlan summary,Wrong WPA2 PSK,Layer 2,Wireless Security,Medium
+13,PC can ping 8.8.8.8 but cannot browse www.cisco.com (Variant 13),"Standard 3-router, 2-switch branch topology",nslookup www.cisco.com,Missing or wrong DNS server,Layer 7,DNS,Medium
+14,PC can ping 8.8.8.8 but cannot browse www.cisco.com (Variant 14),"Standard 3-router, 2-switch branch topology",nslookup www.cisco.com,Missing or wrong DNS server,Layer 7,DNS,Medium
+15,Laptop cannot associate with AP (Variant 15),"Standard 3-router, 2-switch branch topology",show wlan summary,Wrong WPA2 PSK,Layer 2,Wireless Security,Medium
+16,"PC cannot ping external network, local pings work (Variant 16)","Standard 3-router, 2-switch branch topology","show ip route
+show ip interface brief",Incorrect default gateway,Layer 3,Default Gateway,High
+17,"Internal PCs cannot access the internet, routing is fine (Variant 17)","Standard 3-router, 2-switch branch topology",show ip nat translations,Missing ip nat inside/outside on interfaces,Layer 3,NAT,High
+18,Laptop cannot associate with AP (Variant 18),"Standard 3-router, 2-switch branch topology",show wlan summary,Wrong WPA2 PSK,Layer 2,Wireless Security,Medium
+19,Router A cannot reach Router C LAN (Variant 19),"Standard 3-router, 2-switch branch topology","show ip route
+show ip protocols",Missing OSPF network statement,Layer 3,OSPF Routing,High
+20,PC can ping 8.8.8.8 but cannot browse www.cisco.com (Variant 20),"Standard 3-router, 2-switch branch topology",nslookup www.cisco.com,Missing or wrong DNS server,Layer 7,DNS,Medium
+21,PC has APIPA address (169.254.x.x) (Variant 21),"Standard 3-router, 2-switch branch topology","show ip dhcp binding
+show ip dhcp pool",DHCP pool exhausted or missing,Layer 7,DHCP,Medium
+22,PC has APIPA address (169.254.x.x) (Variant 22),"Standard 3-router, 2-switch branch topology","show ip dhcp binding
+show ip dhcp pool",DHCP pool exhausted or missing,Layer 7,DHCP,Medium
+23,Router A cannot reach Router C LAN (Variant 23),"Standard 3-router, 2-switch branch topology","show ip route
+show ip protocols",Missing OSPF network statement,Layer 3,OSPF Routing,High
+24,PC gets IP but cannot reach server in VLAN 30; gateway ping works (Variant 24),"Standard 3-router, 2-switch branch topology","show vlan brief
+show interfaces trunk",Missing VLAN 30 on trunk,Layer 2,Inter-VLAN routing,High
+25,"Internal PCs cannot access the internet, routing is fine (Variant 25)","Standard 3-router, 2-switch branch topology",show ip nat translations,Missing ip nat inside/outside on interfaces,Layer 3,NAT,High
+26,"PC cannot ping external network, local pings work (Variant 26)","Standard 3-router, 2-switch branch topology","show ip route
+show ip interface brief",Incorrect default gateway,Layer 3,Default Gateway,High
+27,"Internal PCs cannot access the internet, routing is fine (Variant 27)","Standard 3-router, 2-switch branch topology",show ip nat translations,Missing ip nat inside/outside on interfaces,Layer 3,NAT,High
+28,Guest Wi-Fi can reach internal server (Variant 28),"Standard 3-router, 2-switch branch topology",show access-lists,ACL permit ip any any placed before deny,Layer 3/4,Access Control Lists,Critical
+29,PC can ping 8.8.8.8 but cannot browse www.cisco.com (Variant 29),"Standard 3-router, 2-switch branch topology",nslookup www.cisco.com,Missing or wrong DNS server,Layer 7,DNS,Medium
+30,"PC cannot ping external network, local pings work (Variant 30)","Standard 3-router, 2-switch branch topology","show ip route
+show ip interface brief",Incorrect default gateway,Layer 3,Default Gateway,High
