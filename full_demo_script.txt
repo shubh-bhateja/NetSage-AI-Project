@@ -1,0 +1,65 @@
+# NetSage AI: 7-Minute Demo Video Script
+
+## 0:00 - 1:00: Introduction & Problem Statement
+**Speaker:**
+"Hello everyone, I am [Your Name] and my teammates are [Teammate Names]. Welcome to the demonstration of NetSage AI.
+
+Our project addresses a common challenge in network engineering: Junior engineers often know individual commands, like 'show ip route', but they struggle to connect a symptom—like a PC failing to reach a server—to the actual root cause. Is it a VLAN issue? A DHCP exhaustion? A bad ACL?
+
+To solve this, we built an AI-assisted troubleshooter for Cisco networks. Crucially, because AI can hallucinate, our system is built around a 'Human Review' safety rule. The AI acts as an assistant, but a human engineer must always review the diagnosis before a fix is accepted. Let me show you how it works."
+
+## 1:00 - 2:30: Dashboard & Dataset Overview
+**(Screen Action: Show the Streamlit 'Overview Dashboard' page.)**
+
+**Speaker:**
+"Here is the NetSage AI dashboard. We built this interface using Python and Streamlit. 
+
+First, let's look at our case dataset. We created a synthetic dataset of 30 distinct troubleshooting cases. As you can see from the charts, these cases cover a wide variety of OSI layer issues, ranging from Layer 2 VLAN misconfigurations to Layer 7 DNS and DHCP failures. 
+
+We also track the severity of these issues and, most importantly, the AI vs Human agreement rate. Right now, our mock data shows an 83% acceptance rate without edits, meaning the AI is mostly correct, but the human oversight catches the remaining 17% of errors."
+
+## 2:30 - 4:00: Running a Diagnosis (The Broken Case)
+**(Screen Action: Navigate to the 'Case Diagnosis' page. Select a case from the dropdown, for example, a VLAN or ACL issue.)**
+
+**Speaker:**
+"Let's walk through diagnosing a broken case. We have an engineer who receives a ticket: 'Guest Wi-Fi can reach internal server.' The engineer grabs the 'show access-lists' output from the router and pastes it here.
+
+Before we even send this to the AI, we have a deterministic Python Rule Checker. Let me hit 'Run Diagnostics'."
+
+**(Screen Action: Click the 'Run Diagnostics' button.)**
+
+**Speaker:**
+"Immediately, the rule checker scans the text. For example, it checks for duplicate IP addresses or interfaces that are administratively down using simple regex. This prevents us from wasting AI tokens on basic, deterministic mistakes. 
+
+Next, the data is sent to our structured AI prompt. We engineered the prompt to force a strict JSON response. As you can see, the AI returns the expected root cause, its confidence level, the exact evidence it found in the show-command output, the next logical command to run, and the step-by-step fix."
+
+## 4:00 - 5:30: Human Oversight & Verification
+**(Screen Action: Scroll down to the 'Human Review' section.)**
+
+**Speaker:**
+"Now we arrive at the core safety feature of our project. The AI has suggested a fix, but it cannot execute it autonomously. 
+
+As a network engineer, I review the JSON output. I see that the AI identified that an 'ACL permit ip any any' was placed before a deny statement. This matches the symptom. 
+
+I have three choices: Accept, Edit, or Reject. Because the diagnosis is flawless, I will click 'Accept'. If this were hooked up to a live production environment, clicking this would deploy the fix via a script. For our lab, this simulates the approval step, allowing us to then verify the fix in Packet Tracer."
+
+**(Screen Action: Briefly pull up Packet Tracer (or explain the verification step).)**
+
+**Speaker:**
+"After applying the fix, we would run a simple ping from the Guest Wi-Fi to the internal server, verifying that the ping now fails, meaning our ACL is correctly blocking the traffic."
+
+## 5:30 - 6:30: Responsible AI Logging
+**(Screen Action: Navigate to the 'Responsible AI Log' page.)**
+
+**Speaker:**
+"To prove that our human-in-the-loop system is necessary, let's look at the Responsible AI Log. 
+
+This log tracks at least 5 instances where the AI confidently gave the wrong answer. For example, in Case 22, the AI assumed a 'Wrong WPA2 PSK' password issue when a laptop couldn't connect. However, the human engineer noticed that the SSID was slightly misspelled—it was a rogue AP. The engineer edited the diagnosis, and the system logged the correction. 
+
+This log serves as our audit trail, ensuring that we use modern AI safely and responsibly in critical networking infrastructure."
+
+## 6:30 - 7:00: Conclusion
+**Speaker:**
+"In conclusion, NetSage AI fulfills all the requirements: we generated 30 robust cases, built a deterministic python rule checker, engineered a structured AI prompt, and enforced a human-in-the-loop review system.
+
+Our code is fully open-source and hosted on GitHub, and this dashboard is deployed live on Streamlit Cloud. Thank you for watching our presentation!"
