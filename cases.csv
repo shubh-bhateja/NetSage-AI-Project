@@ -1,0 +1,299 @@
+case_id,symptom,topology_note,show_outputs,expected_fault,osi_layer,concept,severity
+1,PCs in HR VLAN cannot obtain IP address,R1 is DHCP server, HR VLAN on Gi0/0.10,"R1#show ip dhcp binding
+Bindings from all pools not associated with VRF:
+IP address          Client-ID/              Lease expiration        Type       State      Interface
+10.1.10.2           0100.1122.3344.01       Aug 30 2026 08:00 AM    Automatic  Active     Gi0/0.10
+10.1.10.3           0100.1122.3344.02       Aug 30 2026 08:00 AM    Automatic  Active     Gi0/0.10
+10.1.10.4           0100.1122.3344.03       Aug 30 2026 08:00 AM    Automatic  Active     Gi0/0.10
+10.1.10.5           0100.1122.3344.04       Aug 30 2026 08:00 AM    Automatic  Active     Gi0/0.10
+
+R1#show ip dhcp pool
+Pool HR_Pool:
+ Utilization mark (high/low)    : 100 / 0
+ Subnet size (first/next)       : 0 / 0
+ Total addresses                : 4
+ Leased addresses               : 4
+ Pending event                  : none
+ 0 subnet is currently in the pool:
+ Current index        IP address range                    Leased addresses
+ 10.1.10.5            10.1.10.2        - 10.1.10.5            4",DHCP pool exhausted (all IPs leased),Application,DHCP,High
+2,Servers accessible from bad subnets,R1 external Gi0/0 applied ACL 100,"R1#show access-lists 100
+Extended IP access list 100
+    10 permit ip any any (1452 matches)
+    20 deny tcp 10.0.0.0 0.255.255.255 any eq 80
+    30 permit tcp any any eq 443",permit any any at line 10 before deny,Network,ACL,Critical
+3,Guest PCs have APIPA addresses,Core-SW is L3 switch, acts as DHCP for Guest VLAN 50,"Core-SW#show ip dhcp pool
+Core-SW#
+Core-SW#show ip dhcp binding
+Bindings from all pools not associated with VRF:
+IP address          Client-ID/              Lease expiration        Type       State      Interface
+Core-SW#",DHCP pool not created,Application,DHCP,High
+4,Internal PCs can't access Internet,R1 connecting LAN Gi0/0 to ISP Gi0/1,"R1#show ip nat statistics
+Total active translations: 0 (0 static, 0 dynamic; 0 extended)
+Outside interfaces:
+  GigabitEthernet0/1
+Inside interfaces:
+  null
+Hits: 0  Misses: 0
+
+R1#show run int Gi0/0
+interface GigabitEthernet0/0
+ ip address 192.168.100.1 255.255.255.0
+! Missing ip nat inside",No nat inside on Gi0/0,Network,NAT,High
+5,Host cannot ping off subnet,PC1 IP 10.1.1.10/24, R1 Gi0/0 is 10.1.1.1,"PC1> ipconfig
+Ethernet adapter Local Area Connection:
+   Connection-specific DNS Suffix  . :
+   IPv4 Address. . . . . . . . . . . : 10.1.1.10
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : 10.1.2.1",Gateway configured but wrong subnet,Network,Default Gateway,High
+6,Internet traffic failing,R2 WAN is Se0/0/0, NAT inside on Gi0/0. ACL supposed to block incoming telnet,"R2#show ip int Se0/0/0 | inc access list
+  Outgoing access list is Block_Telnet
+  Inbound  access list is not set
+
+R2#show access-lists Block_Telnet
+Extended IP access list Block_Telnet
+    10 deny tcp any any eq telnet
+    20 permit ip any any (2 matches)",ACL applied wrong direction (out vs in),Network,ACL,Medium
+7,Can ping 8.8.8.8 but can't browse websites,PC uses DNS 8.8.8.8, router blocking ICMP to DNS,"PC> nslookup www.cisco.com
+Server:  UnKnown
+Address:  8.8.8.8
+
+DNS request timed out.
+    timeout was 2 seconds.
+DNS request timed out.
+    timeout was 2 seconds.
+*** Request to UnKnown timed-out",DNS server unreachable,Application,DNS,High
+8,VLAN 30 users isolated,SW1 Gi0/1 trunk to router, VLAN 30 missing,"SW1#show interfaces trunk
+
+Port        Mode             Encapsulation  Status        Native vlan
+Gi0/1       on               802.1q         trunk         1
+
+Port        Vlans allowed on trunk
+Gi0/1       1,10,20
+
+Port        Vlans allowed and active in management domain
+Gi0/1       1,10,20",VLAN 30 not in allowed list on trunk,Data Link,Inter-VLAN routing,High
+9,No IP assigned to new devices in Sales,R2 provides DHCP to Sales via Gi0/1,"R2#show ip dhcp pool
+Pool Sales_Pool:
+ Utilization mark (high/low)    : 100 / 0
+ Subnet size (first/next)       : 0 / 0
+ Total addresses                : 254
+ Leased addresses               : 0
+ Excluded addresses             : 254
+ Pending event                  : none
+ 0 subnet is currently in the pool:
+ Current index        IP address range                    Leased addresses
+ 192.168.20.1         192.168.20.1     - 192.168.20.254       0
+
+R2#show run | inc ip dhcp excluded
+ip dhcp excluded-address 192.168.20.1 192.168.20.254",Excluded addresses cover entire range,Application,DHCP,High
+10,Name resolution fails instantly,DHCP pushes wrong DNS IP,"PC> ipconfig /all | findstr ""DNS Servers""
+   DNS Servers . . . . . . . . . . . : 10.99.99.99
+
+PC> nslookup google.com
+Server:  UnKnown
+Address:  10.99.99.99
+
+*** UnKnown can't find google.com: No response from server",Wrong DNS server IP,Application,DNS,Medium
+11,Router cannot resolve ping names,R1 configured with DNS but no route to it,"R1#ping cisco.com
+Translating ""cisco.com""...domain server (172.31.1.50)
+% Unrecognized host or address, or protocol not running.
+
+R1#show ip route 172.31.1.50
+% Network not in table",DNS server set but no route to it,Network,DNS,Low
+12,Laptops cannot connect to WiFi,WLC configured, AP broadcasting, clients fail auth,"WLC# show wlan 1
+
+WLAN Identifier.................................. 1
+Profile Name..................................... Corp_WiFi
+Network Name (SSID).............................. Corp_WiFi
+Status........................................... Enabled
+MAC Filtering.................................... Disabled
+Broadcast SSID................................... Enabled
+Security
+    802.11 Authentication:........................ Open System
+    Static WEP Keys............................... Disabled
+    Wi-Fi Protected Access (WPA/WPA2)............. Enabled
+        WPA2 (802.11i)............................ Enabled
+        Auth Key Management
+            PSK................................... Enabled (Wrong PSK on clients)",Wrong PSK configured,Data Link,Wireless Security,High
+13,Switch takes long time to fail exec typos,SW1 has no DNS configured,"SW1#ping www.google.com
+Translating ""www.google.com""...domain server (255.255.255.255)
+% Unrecognized host or address, or protocol not running.
+
+SW1#show run | inc ip name-server
+SW1#",ip name-server not configured,Application,DNS,Low
+14,Router refuses to resolve names,R2 has domain lookup disabled,"R2#ping www.cisco.com
+% Unrecognized host or address, or protocol not running.
+
+R2#show run | inc domain-lookup
+no ip domain-lookup",DNS lookup disabled on router,Application,DNS,Medium
+15,Guests don't see the Guest network,AP standalone configured,"AP#show dot11 associations
+802.11 Client MAC Address  IP Address      Device Name
+None
+
+AP#show run | sec ssid
+dot11 ssid Guest_Network_5G
+   authentication open
+   guest-mode
+! Clients are looking for 'Guest_Network'",SSID mismatch,Data Link,Wireless Security,High
+16,Router cannot reach Internet,R1 connected to ISP on Gi0/0, internal on Gi0/1,"R1#show ip route
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+Gateway of last resort is not set
+
+      10.0.0.0/8 is variably subnetted, 2 subnets, 2 masks
+C        10.1.1.0/24 is directly connected, GigabitEthernet0/1
+L        10.1.1.1/32 is directly connected, GigabitEthernet0/1
+      203.0.113.0/24 is variably subnetted, 2 subnets, 2 masks
+C        203.0.113.0/30 is directly connected, GigabitEthernet0/0
+L        203.0.113.2/32 is directly connected, GigabitEthernet0/0",No default route configured,Network,Default Gateway,High
+17,Branch office can't reach HQ via Internet,R2 connecting via Se0/0 to ISP,"R2#show ip nat statistics
+Total active translations: 0 (0 static, 0 dynamic; 0 extended)
+Outside interfaces:
+  null
+Inside interfaces:
+  GigabitEthernet0/0
+Hits: 0  Misses: 0
+
+R2#show run int Se0/0
+interface Serial0/0
+ ip address 203.0.113.2 255.255.255.252
+! Missing ip nat outside",No nat outside on Se0/0,Network,NAT,High
+18,Old barcode scanners cannot connect,WLC WLAN 2 set for WPA2 only, scanners support WPA,"WLC# show wlan 2
+
+WLAN Identifier.................................. 2
+Profile Name..................................... Warehouse
+Network Name (SSID).............................. Warehouse
+Security
+    Wi-Fi Protected Access (WPA/WPA2)............. Enabled
+        WPA (SSN IE).............................. Disabled
+        WPA2 (802.11i)............................ Enabled",Security mode mismatch (WPA vs WPA2),Data Link,Wireless Security,Medium
+19,Remote branch cannot reach LAN subnets,R1 OSPF 1 missing LAN Gi0/1,"R1#show ip ospf interface brief
+Interface    PID   Area            IP Address/Mask    Cost  State Nbrs/F/C
+Se0/0/0      1     0               10.255.255.1/30    64    P2P   1/1/1
+
+R1#show ip route connected
+C        192.168.100.0/24 is directly connected, GigabitEthernet0/1
+
+R1#show run | sec router ospf
+router ospf 1
+ network 10.255.255.0 0.0.0.3 area 0",Network statement missing for LAN,Network,OSPF Routing,High
+20,User redirected to wrong portal,Internal DNS server poisoned or wrong record,"PC> nslookup intranet.company.local
+Server:  dc1.company.local
+Address:  192.168.10.10
+
+Non-authoritative answer:
+Name:    intranet.company.local
+Address:  192.168.50.100
+! Expected address is 192.168.10.200",DNS server responds but with wrong record,Application,DNS,Medium
+21,PCs get IP but cannot reach outside subnets,R3 is DHCP server for Engineering subnet 172.16.5.0/24,"R3#show ip dhcp pool Eng_Pool
+Pool Eng_Pool:
+ Utilization mark (high/low)    : 100 / 0
+ Subnet size (first/next)       : 0 / 0
+ Total addresses                : 254
+ Leased addresses               : 15
+ Pending event                  : none
+ 0 subnet is currently in the pool:
+ Current index        IP address range                    Leased addresses
+ 172.16.5.17          172.16.5.1       - 172.16.5.254         15
+
+R3#show run | sec dhcp pool
+ip dhcp pool Eng_Pool
+ network 172.16.5.0 255.255.255.0
+ dns-server 8.8.8.8",Missing default-router in pool,Network,DHCP,Medium
+22,Remote PCs not getting DHCP across WAN,Central R1 is DHCP, Remote R2 has clients on Gi0/0,"R2#show run int Gi0/0
+Building configuration...
+
+Current configuration : 110 bytes
+!
+interface GigabitEthernet0/0
+ description LAN Interface
+ ip address 10.50.1.1 255.255.255.0
+ duplex auto
+ speed auto
+end",ip helper-address missing on VLAN interface,Network,DHCP,High
+23,OSPF adj formed but routes not in table,R2 WAN configured in wrong area,"R2#show ip ospf neighbor
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+10.255.255.1      0   FULL/  -        00:00:35    10.255.255.1    Serial0/0/0
+
+R2#show ip protocols
+Routing Protocol is ""ospf 1""
+  Outgoing update filter list for all interfaces is not set
+  Incoming update filter list for all interfaces is not set
+  Router ID 10.255.255.2
+  Number of areas in this router is 1. 1 normal 0 stub 0 nssa
+  Routing for Networks:
+    10.255.255.0 0.0.0.3 area 1
+! Should be area 0 to match backbone",Wrong area assignment,Network,OSPF Routing,High
+24,VLAN 30 exists on switch but no routing,R1 connected to SW1 trunk,"SW1#show vlan brief | inc 30
+30   VLAN0030                         active    Fa0/5
+
+R1#show ip int brief
+Interface              IP-Address      OK? Method Status                Protocol
+GigabitEthernet0/0     unassigned      YES unset  up                    up
+GigabitEthernet0/0.10  10.1.10.1       YES manual up                    up
+GigabitEthernet0/0.20  10.1.20.1       YES manual up                    up
+! Missing Gi0/0.30",VLAN 30 exists but no sub-interface on router,Network,Inter-VLAN routing,High
+25,Specific subnet 10.2.0.0/24 can't access web,R3 doing overload NAT with route-map or ACL,"R3#show ip nat translations
+Pro Inside global      Inside local       Outside local      Outside global
+tcp 198.51.100.2:4512  10.1.0.50:4512     8.8.8.8:53         8.8.8.8:53
+
+R3#show access-lists NAT_ALLOW
+Standard IP access list NAT_ALLOW
+    10 permit 10.1.0.0, wildcard bits 0.0.0.255 (152 matches)
+    ! Missing 10.2.0.0 subnet",Wrong ACL in nat source list,Network,NAT,Medium
+26,PC cannot reach anything,PC2 static IP configured,"PC2> ipconfig /all
+Ethernet adapter Local Area Connection:
+   IPv4 Address. . . . . . . . . . . : 192.168.5.50
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : 192.168.5.254
+
+R1#show ip int brief
+Interface              IP-Address      OK? Method Status                Protocol
+GigabitEthernet0/0     192.168.5.1     YES manual up                    up
+GigabitEthernet0/1     unassigned      YES unset  administratively down down",Gateway IP doesn't exist on any router,Network,Default Gateway,High
+27,Intermittent Internet access for users,R4 using dynamic NAT pool without overload,"R4#show ip nat statistics
+Total active translations: 10 (0 static, 10 dynamic; 0 extended)
+Outside interfaces:
+  GigabitEthernet0/1
+Inside interfaces:
+  GigabitEthernet0/0
+Hits: 543  Misses: 125
+CEF Translated packets: 543, CEF Punted packets: 0
+Expired translations: 12
+Dynamic mappings:
+-- Inside Source
+[Id: 1] access-list 1 pool ISP_POOL refcount 10
+ pool ISP_POOL: netmask 255.255.255.248
+	start 198.51.100.10 end 198.51.100.19
+	type generic, total addresses 10, allocated 10 (100%), misses 125",NAT pool exhausted,Network,NAT,High
+28,PCs not getting DHCP from server on another VLAN,Core switch routing between VLAN 10 and 20, ACL on VLAN 10 IN,"Core#show access-lists VLAN10_IN
+Extended IP access list VLAN10_IN
+    10 permit tcp any any eq 80
+    20 permit tcp any any eq 443
+    30 permit icmp any any (40 matches)
+    ! Implicit deny any any taking effect blocking UDP 67/68",Implicit deny blocking DHCP,Network,ACL,High
+29,Intermittent web access,ACL on R3 drops UDP 53,"PC> nslookup example.com
+Server:  google-public-dns-a.google.com
+Address:  8.8.8.8
+
+DNS request timed out.
+
+R3#show access-lists INBOUND_WAN
+Extended IP access list INBOUND_WAN
+    10 permit tcp any any eq 80
+    20 permit tcp any any eq 443
+    30 deny udp any any eq 53 (204 matches)
+    40 permit ip any any",DNS timeout due to ACL blocking UDP 53,Network,DNS,High
+30,Packets looping or dropping to Internet,R2 connected to ISP on 209.165.200.224/30,"R2#show ip route static
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+Gateway of last resort is 209.165.200.226 to network 0.0.0.0
+
+S*    0.0.0.0/0 [1/0] via 209.165.200.226
+
+R2#show cdp neighbors detail | inc IP address
+  IP address: 209.165.200.225
+! Next hop should be 209.165.200.225 (ISP router)",Default route pointing to wrong next-hop,Network,Default Gateway,Critical
