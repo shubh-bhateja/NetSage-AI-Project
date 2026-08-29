@@ -1,6 +1,6 @@
 case_id,ai_diagnosis,human_correction,reason_for_correction
-2,Incorrect default gateway,Incorrect DNS server,AI misinterpreted local ping failure as gateway issue when it was actually DNS resolution failing first.
-5,Missing OSPF network statement,Incorrect wildcard mask,AI found missing network but missed that the existing statement had a wrong wildcard mask covering the wrong subnet.
-8,Missing VLAN 30 on trunk,Port security violation,AI assumed missing VLAN because of connectivity loss, but show interface showed err-disabled due to port security.
-14,ACL placed before deny,ACL wrong direction (out instead of in),AI identified the right ACL but failed to notice it was applied in the wrong direction on the interface.
-22,Wrong WPA2 PSK,SSID mismatch,AI assumed password issue, but the client was trying to associate with a similarly named rogue SSID.
+2,Incorrect default gateway,Incorrect DNS server,"AI misinterpreted local ping failure as gateway issue when it was actually DNS resolution failing first."
+5,Missing OSPF network statement,Incorrect wildcard mask,"AI found missing network but missed that the existing statement had a wrong wildcard mask covering the wrong subnet."
+8,Missing VLAN 30 on trunk,Port security violation,"AI assumed missing VLAN because of connectivity loss, but show interface showed err-disabled due to port security."
+14,ACL placed before deny,ACL wrong direction (out instead of in),"AI identified the right ACL but failed to notice it was applied in the wrong direction on the interface."
+22,Wrong WPA2 PSK,SSID mismatch,"AI assumed password issue, but the client was trying to associate with a similarly named rogue SSID."
