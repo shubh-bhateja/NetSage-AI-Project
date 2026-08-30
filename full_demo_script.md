@@ -2,7 +2,9 @@
 
 ## 0:00 - 1:00: Introduction & Problem Statement
 **Speaker:**
-"Hello everyone, I am [Your Name] and my teammates are [Teammate Names]. Welcome to the demonstration of NetSage AI.
+"Hello everyone, I am [Your Name] and my teammate Somansh.
+ 
+Welcome to the demonstration of NetSage AI.
 
 Our project addresses a common challenge in network engineering: Junior engineers often know individual commands, like 'show ip route', but they struggle to connect a symptom—like a PC failing to reach a server—to the actual root cause. Is it a VLAN issue? A DHCP exhaustion? A bad ACL?
 
